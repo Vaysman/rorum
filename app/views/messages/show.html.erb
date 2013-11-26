@@ -1,0 +1,12 @@
+<p>
+	<strong>Author:</strong>
+	<%= @message.author %>
+</p>
+
+<p>
+	<strong>Message:</strong>
+	<%= @message.message %>
+</p>
+
+<%= link_to 'back', messages_path %>
+<%= link_to 'edit', edit_message_path %>

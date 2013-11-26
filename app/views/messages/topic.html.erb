@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id = "container">
+      <div id = "topic"></div>
+
+      <form id = "new_message_form">
+  	      <input class = "new_message author" type = "text" placeholder = "author">
+  	      <textarea class = "new_message body inactive" placeholder = "message"></textarea>
+  	      <button class = "button">send</button>
+	    </form>
+    </div>
+
+    <script id = "message_template" type="text/template">
+      <b><div class = "author"><%%- author %></div></b>
+      <div class = "body"><%%- message %></div>
+      <div class = "controls">
+        <b><button class = "edit">edit</button></b>
+        <button class = "delete">delete</button>
+      </div>
+    </script>
+    <script id = "edit_message_template" type="text/template">
+      <!-- do not remove the wrapping tag -->
+      <div>
+        <input class = "edit_message author">
+        <textarea class = "edit_message body"></textarea>
+      </div>
+    </script>
+    <script>
+      var MessageModel = Backbone.Model.extend({
+        urlRoot: '/messages/'
+      })
+
+      var Messages = Backbone.Collection.extend({
+        url: '/messages',
+        model: MessageModel
+      })
+
+      var MessageVeiw = Backbone.View.extend({
+        
+        template: $('#message_template').html(),
+        tagName: 'div',
+        className: 'message',
+
+        render: function() {
+          var template = _.template(this.template)
+
+          this.$el.html(template(this.model.toJSON()))
+          return this
+        }
+      })
+
+      var Topic = Backbone.View.extend({
+        el: $('#topic'),
+
+        initialize: function() {
+          this.collection = new Messages()
+          this.render_topic()
+        },
+
+        render_topic: function() {
+          var that = this
+          this.collection.fetch()
+          this.collection.on('add', function(msg) {
+            that.render_message(msg)
+          })
+        },
+
+        render_message: function(message_model) {
+          var message_view = new MessageVeiw({
+            model: message_model
+          })
+
+          var message_el = message_view.render().el
+          this.$el.append(message_el)
+
+          this.message_events(message_model, message_el)
+
+          return message_el
+        },
+
+        message_events: function(message_model, message_el) {
+            $('.delete', message_el).on('click', function(e) {
+
+            message_model.destroy({
+              success: function() {
+                $(message_el).animate({height: 0, opacity: 0, padding: 0, margin: 0}, 300, function() {
+                  message_el.parentNode.removeChild(message_el)
+                })
+              }
+            })
+          })
+
+          var edit_btn = $('.edit', message_el)
+
+          edit_btn.on('click', function edit(e) {
+            var author_div = $('.author', message_el)
+            var body_div = $('.body', message_el)
+            /*$(message_el).find('.author')
+            .replaceWith('<input class = "edit_message author" value = "' + author_div.text() + '">')
+            $(message_el).find('.body')
+            .replaceWith('<textarea class = "edit_message body">' + body_div.text() + '</textarea>')*/
+            $('.author', message_el)
+            .replaceWith($('.author', $('#edit_message_template').text()).val(author_div.text()))
+            $('.body', message_el)
+            .replaceWith($('.body', $('#edit_message_template').text()).val(body_div.text()))
+            edit_btn.text('save')
+
+            edit_btn.off('click')
+            edit_btn.on('click', function(e) {
+
+              var author_inp = $('.author', message_el)
+              var body_ta = $('.body', message_el)
+
+              message_model.save({
+                author: author_inp.val(),
+                message: body_ta.val()
+              }, {
+                success: function() {
+                  $('.author', message_el).replaceWith(author_div.text(author_inp.val())[0])
+                  $('.body', message_el).replaceWith(body_div.text(body_ta.val())[0])
+                  edit_btn.text('edit')
+
+                  edit_btn.off('click')
+                  edit_btn.on('click', edit)
+                }
+              })
+            })
+          })
+
+          $(message_el).on('mouseover', function() {
+            $('.controls button', this).css('visibility', 'visible')
+
+            $(this).on('mouseout', function() {
+              if($('.edit_message', this).length)
+                return
+
+              $('.controls button', this).css('visibility', 'hidden')
+            })
+          })
+        }
+      })
+
+      var topic = new Topic()
+
+      $('#new_message_form .button').on('click', function(e) {
+        e.preventDefault()
+
+        var new_message = new MessageModel()
+        var message = {
+          author: $('#new_message_form .author').val(),
+          message: $('#new_message_form .body').val(),
+        }
+
+        new_message.save(message, {
+          success: function(msg) {
+            var creation = $(topic.render_message(new_message))
+            var normal_height = creation.height()
+            creation.addClass('message_creation')
+            .animate({height: normal_height, opacity: 1}, 300, function() {
+              creation.removeClass('message_creation')
+              .css('height', 'auto')
+            })
+
+            $('#new_message_form')[0].reset()
+          }
+        })
+      })
+
+
+      /* ui events */
+
+      $('#new_message_form .body').on('click', function() {
+        $('#new_message_form .body').removeClass('inactive')
+        $('#new_message_form .author').css('display', 'block')
+        $('#new_message_form .button').css('display', 'block')
+      })
+
+      $(document).on('click', function(e) {
+        if($(e.target).closest('#new_message_form .body').length
+          || $(e.target).closest('#new_message_form .author').length)
+          return
+
+        $('#new_message_form .body').addClass('inactive')
+        $('#new_message_form .author').css('display', 'none')
+        $('#new_message_form .button').css('display', 'none')
+      })
+
+    </script>
+  </body>
+</html>

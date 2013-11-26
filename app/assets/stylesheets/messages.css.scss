@@ -1,0 +1,110 @@
+// Place all the styles related to the messages controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+body {
+  font-size: 11pt;
+  font-family: arial;
+}
+
+a {
+    color: #3f74b7;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #3f74b7;
+    text-decoration: underline;
+}
+
+::-webkit-input-placeholder {
+    color: #a9cfff;
+}
+
+button {
+    background-color: #71b0ff;
+    border: 0px;
+    height: 30px;
+    color: #fff;
+    font-size: 11pt;
+    padding: 6px 3px 6px 8px;
+    font-size: 13pt;
+}
+
+button:hover {
+    background-color: #3b92ff;
+    cursor: pointer;
+}
+
+button:focus {
+    outline: none;
+}
+
+#container {
+	width: 700px;
+	margin: 0 auto;
+}
+
+.message {
+	margin: 0px 0px 10px 0px;
+	padding: 7px;
+	background-color: #eef6ff;
+}
+
+.message .controls button {
+    visibility: hidden;
+    height: 25px;
+    background-color: #a5cdff;
+}
+
+.message .controls button:hover {
+    background-color: #5da5ff;
+}
+
+.new_message {
+	#border: 2px solid #add2ff;
+    border: 2px solid #71b0ff;
+	padding: 3px;
+	width: 692px;
+	max-width: 692px;
+}
+
+#new_message_form .author {
+    display: none;
+}
+
+#new_message_form .body {
+	height: 100px;
+}
+
+#new_message_form .inactive {
+    border-color: #c1ddff;
+    height: 70px;
+}
+
+#new_message_form .button {
+    display: none;
+    border: 0px;
+    width: 60px;
+    padding: 11px 0px 6px 14px;
+}
+
+.edit_message {
+	border: 2px solid #71b0ff;
+	padding: 3px;
+	width: 672px;
+}
+
+.message .body {
+	min-height: 60px;
+	resize: vertical;
+}
+
+.message .controls {
+	text-align: right;
+}
+
+.message_creation {
+    opacity: 0;
+    height: 0px;
+}

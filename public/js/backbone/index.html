@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<div style = "width: 700px; margin: 0 auto">
+			<div id = "topic"></div>
+		</div>
+
+		<script src = "./jquery-1.10.2.js"></script>
+		<script src = "./underscore.js"></script>
+		<script src = "./backbone.js"></script>
+		<script id = "message_template" type="text/template">
+			<div style = "margin: 10px; padding: 10px; background-color: #CCCCFF; height: 100px">
+				<div><b><%= author %></b></div>
+				<div><%= message %></div>
+			</div>
+		</script>
+		<script>
+			var messages_arr = [
+				{'author': 'autor1', 'message': 'Message'},
+				{'author': 'autor2', 'message': 'Message'},
+				{'author': 'autor3', 'message': 'Message'},
+				{'author': 'autor4', 'message': 'Message'},
+				{'author': 'autor5', 'message': 'Message'}
+			]
+
+			var MessageModel = Backbone.Model.extend({
+				urlRoot: '../../messages/'
+			})
+
+			var Messages = Backbone.Collection.extend({
+				url: '../../messages',
+				model: MessageModel
+			})
+
+			var MessageVeiw = Backbone.View.extend({
+				tagName: 'div',
+				template: $('#message_template').html(),
+
+				render: function() {
+					var template = _.template(this.template)
+
+					this.$el.html(template(this.model.toJSON()))
+					return this
+				}
+			})
+
+			var Topic = Backbone.View.extend({
+				el: $('#topic'),
+
+				initialize: function() {
+					this.collection = new Messages(/*messages_arr*/)
+					this.render_topic()
+				},
+
+				render_topic: function() {
+					/*_.each(this.collection.models, function(item) {
+						console.log('33')
+						item.fetch({
+							success: function(msg) {
+								console.log('fetch succ')
+								this.render_message(msg)
+							},
+							error: function() {
+								console.log('fetch err', arguments)
+							}
+						})
+					}, this)
+*/
+					var that = this
+					this.collection.fetch()
+					this.collection.on('add', function(msg) {
+						that.render_message(msg)
+					})
+				},
+
+				render_message: function(message_model) {
+					var message_view = new MessageVeiw({
+						model: message_model
+					})
+
+					this.$el.append(message_view.render().el)
+				}
+			})
+
+			new Topic()
+		</script>
+	</body>
+</html>

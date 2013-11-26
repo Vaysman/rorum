@@ -1,0 +1,27 @@
+<%= form_for :post, url: messages_path do |f| %>
+
+  <% if @message.errors.any? %>
+    <h2><%= pluralize(@message.errors.count, 'error') %>prohibited this message from being saved:</h2>
+    <ul>
+      <% @message.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <p>
+    <%= f.label :author %><br>
+    <%= f.text_field :author %>
+  </p>
+
+  <p>
+    <%= f.label :message %><br>
+    <%= f.text_area :message %>
+  </p>
+
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>
+
+<%= link_to 'back', messages_path %>
