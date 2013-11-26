@@ -4,15 +4,17 @@
     <div id = "container">
       <div id = "topic"></div>
 
+      <% if user_signed_in? %>
       <form id = "new_message_form">
-  	      <input class = "new_message author" type = "text" placeholder = "author">
-  	      <textarea class = "new_message body inactive" placeholder = "message"></textarea>
-  	      <button class = "button">send</button>
-	    </form>
+          <!-- <input class = "new_message author" type = "text" placeholder = "author"> -->
+          <textarea class = "new_message body inactive" placeholder = "message"></textarea>
+          <button class = "button">send</button>
+      </form>
+      <% end %>
     </div>
 
     <script id = "message_template" type="text/template">
-      <b><div class = "author"><%%- author %></div></b>
+      <b><div class = "author"><%%- user.email %></div></b>
       <div class = "body"><%%- message %></div>
       <div class = "controls">
         <b><button class = "edit">edit</button></b>
@@ -22,7 +24,6 @@
     <script id = "edit_message_template" type="text/template">
       <!-- do not remove the wrapping tag -->
       <div>
-        <input class = "edit_message author">
         <textarea class = "edit_message body"></textarea>
       </div>
     </script>
@@ -80,64 +81,64 @@
         },
 
         message_events: function(message_model, message_el) {
+
+          <% if user_signed_in? %>
             $('.delete', message_el).on('click', function(e) {
 
-            message_model.destroy({
-              success: function() {
-                $(message_el).animate({height: 0, opacity: 0, padding: 0, margin: 0}, 300, function() {
-                  message_el.parentNode.removeChild(message_el)
-                })
-              }
-            })
-          })
-
-          var edit_btn = $('.edit', message_el)
-
-          edit_btn.on('click', function edit(e) {
-            var author_div = $('.author', message_el)
-            var body_div = $('.body', message_el)
-            /*$(message_el).find('.author')
-            .replaceWith('<input class = "edit_message author" value = "' + author_div.text() + '">')
-            $(message_el).find('.body')
-            .replaceWith('<textarea class = "edit_message body">' + body_div.text() + '</textarea>')*/
-            $('.author', message_el)
-            .replaceWith($('.author', $('#edit_message_template').text()).val(author_div.text()))
-            $('.body', message_el)
-            .replaceWith($('.body', $('#edit_message_template').text()).val(body_div.text()))
-            edit_btn.text('save')
-
-            edit_btn.off('click')
-            edit_btn.on('click', function(e) {
-
-              var author_inp = $('.author', message_el)
-              var body_ta = $('.body', message_el)
-
-              message_model.save({
-                author: author_inp.val(),
-                message: body_ta.val()
-              }, {
+              message_model.destroy({
                 success: function() {
-                  $('.author', message_el).replaceWith(author_div.text(author_inp.val())[0])
-                  $('.body', message_el).replaceWith(body_div.text(body_ta.val())[0])
-                  edit_btn.text('edit')
-
-                  edit_btn.off('click')
-                  edit_btn.on('click', edit)
+                  $(message_el).animate({height: 0, opacity: 0, padding: 0, margin: 0}, 300, function() {
+                    message_el.parentNode.removeChild(message_el)
+                  })
                 }
               })
             })
-          })
 
-          $(message_el).on('mouseover', function() {
-            $('.controls button', this).css('visibility', 'visible')
+            var edit_btn = $('.edit', message_el)
 
-            $(this).on('mouseout', function() {
-              if($('.edit_message', this).length)
+            edit_btn.on('click', function edit(e) {
+              var body_div = $('.body', message_el)
+              /*$(message_el).find('.author')
+              .replaceWith('<input class = "edit_message author" value = "' + author_div.text() + '">')
+              $(message_el).find('.body')
+              .replaceWith('<textarea class = "edit_message body">' + body_div.text() + '</textarea>')*/
+              $('.body', message_el)
+              .replaceWith($('.body', $('#edit_message_template').text()).val(body_div.text()))
+              edit_btn.text('save')
+
+              edit_btn.off('click')
+              edit_btn.on('click', function(e) {
+
+                var body_ta = $('.body', message_el)
+
+                message_model.save({
+                  message: body_ta.val()
+                }, {
+                  success: function() {
+                    $('.body', message_el).replaceWith(body_div.text(body_ta.val())[0])
+                    edit_btn.text('edit')
+
+                    edit_btn.off('click')
+                    edit_btn.on('click', edit)
+                  }
+                })
+              })
+            })
+
+            $(message_el).on('mouseover', function() {
+              if($('.author', this).text() != '<%= current_user.email %>')
                 return
 
-              $('.controls button', this).css('visibility', 'hidden')
+              $('.controls button', this).css('visibility', 'visible')
+
+              $(this).on('mouseout', function() {
+                if($('.edit_message', this).length)
+                  return
+
+                $('.controls button', this).css('visibility', 'hidden')
+              })
             })
-          })
+          <% end %>
         }
       })
 
@@ -148,7 +149,6 @@
 
         var new_message = new MessageModel()
         var message = {
-          author: $('#new_message_form .author').val(),
           message: $('#new_message_form .body').val(),
         }
 
@@ -172,17 +172,14 @@
 
       $('#new_message_form .body').on('click', function() {
         $('#new_message_form .body').removeClass('inactive')
-        $('#new_message_form .author').css('display', 'block')
         $('#new_message_form .button').css('display', 'block')
       })
 
       $(document).on('click', function(e) {
-        if($(e.target).closest('#new_message_form .body').length
-          || $(e.target).closest('#new_message_form .author').length)
+        if($(e.target).closest('#new_message_form .body').length)
           return
 
         $('#new_message_form .body').addClass('inactive')
-        $('#new_message_form .author').css('display', 'none')
         $('#new_message_form .button').css('display', 'none')
       })
 

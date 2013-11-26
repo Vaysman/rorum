@@ -11,21 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131126145046) do
+ActiveRecord::Schema.define(version: 20131126183127) do
 
-  create_table "messages", force: true do |t|
-    t.string   "author"
-    t.text     "message"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
+# Could not dump table "messages" because of following NoMethodError
+#   undefined method `[]' for nil:NilClass
 
   create_table "posts", force: true do |t|
     t.string   "author"
     t.text     "message"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "user_id"
   end
+
+  add_index "posts", ["user_id"], name: "index_posts_on_user_id"
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false

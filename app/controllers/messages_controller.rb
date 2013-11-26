@@ -20,9 +20,10 @@ class MessagesController < ApplicationController
 =end
 
   def create
-    @message = Message.new(:author => params[:author], :message => params[:message])#message_params)
-
-    response_goodness(@message.save)
+    if user_signed_in?
+      @message = Message.new(user_id: current_user.id, message: params[:message])#message_params)
+      response_goodness(@message.save)
+    end
   end
 
 =begin
@@ -30,22 +31,39 @@ class MessagesController < ApplicationController
     #@message = Message.find(params[:id])
     render json: Message.find(params[:id]).to_json
   end
-=end
+
 
   def edit
     @message = Message.find(params[:id])
   end
+=end
 
   def update
-    @message = Message.find(params[:id])
+    if user_signed_in?
+      @message = Message.find(params[:id])
 
-    response_goodness(@message.update(:author => params[:author], :message => params[:message]))
+      if @message.user_id == current_user.id
+        response_goodness(@message.update(message: params[:message]))
+      else
+        response_goodness(false)
+      end
+    else
+      response_goodness(false)
+    end
   end
 
   def destroy
-    @message = Message.find(params[:id])
-    
-    response_goodness(@message.destroy)
+    if user_signed_in?
+      @message = Message.find(params[:id])
+
+      if @message.user_id == current_user.id
+        response_goodness(@message.destroy)
+      else
+        response_goodness(false)
+      end
+    else
+      response_goodness(false)
+    end
   end
 
 =begin
